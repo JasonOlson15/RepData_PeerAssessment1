@@ -7,16 +7,70 @@ output:
 
 
 ## Loading and preprocessing the data
+In order to complete all the analysis required in this assignment the dplyr 
+library is required.
 
+```{r chunk_name, message=FALSE}
+library(dplyr);
+```
 
+The first thing that needs to be done is to unzip the activity.zip file which
+contains the data which will be used in this assignment.
+
+```{r}
+unzip("activity.zip", overwrite = TRUE);
+```
+
+The next step is to get an understanding of what the data in this file looks
+like. To do this the file will be read and then the first 10 rows will be 
+displayed.
+
+```{r}
+activityData <- read.csv("activity.csv");
+head(activityData, 10);
+```
 
 ## What is mean total number of steps taken per day?
+To determine the mean total number of steps taken per day the mean will be taken
+of the data set grouped by day. 
 
+```{r}
+activityData_byDayMean <- activityData %>% group_by(date) %>% summarise_each(funs(mean))
+activityData_byDayMean
+```
 
+Now that the mean is calculated by day, a histogram can be created to look at 
+the distribution of steps per day.
+
+```{r}
+hist(activityData_byDayMean$steps, main="Steps Histogram", ylab="Frequency", xlab="# of Steps per 5 mins", col="lightblue", labels=TRUE, ylim=c(0,20))
+```
+
+From the histogram above it is clear that the highest level of frequency is in the 30-50 steps per 5 min period. 
+
+Next a summary of the data will be considered with the focus being specifically on the values in steps.
+
+```{r}
+summary(activityData_byDayMean)
+```
+
+With the NA values being excluded the mean for steps per day is `r format(round(mean(activityData_byDayMean$steps, na.rm=TRUE),4), nsmall=4)`. The median is `r format(round(median(activityData_byDayMean$steps, na.rm=TRUE),4), nsmall=4)`
 
 ## What is the average daily activity pattern?
+To answer the question of what the average daily activity pattern is, the data must
+first be grouped by interval.
 
+```{r}
+activityData_byIntMean <- activityData %>% group_by(interval) %>% summarise_each(funs(mean(., na.rm=TRUE)))
+activityData_byIntMean
+```
 
+With the data now grouped, a time series plot can be created showing the average number of steps over time.
+This provides a visual of the individuals activity levels throughout the day.
+
+```{r}
+plot.ts(x=activityData_byIntMean$interval, y=activityData_byIntMean$steps, ylim=c(0,210), type="l", main="Daily Activity Pattern", xlab="5 min Interval", ylab="Average # of Steps")
+```
 
 ## Imputing missing values
 
